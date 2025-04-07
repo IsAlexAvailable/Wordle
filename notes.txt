@@ -1,0 +1,26 @@
+Wordle!!!
+
+backend
+- game loop
+- read collection of words into data structure
+	- grab unique guessing word 
+	- test if guess belongs to this collection
+- player gets 5 unique guesses
+- player gets feedback
+	- is a valid guess?
+		- is a word
+		- is a unique word
+	- give information about guessed word
+		- word contains letter
+		- letter in correct place
+		- how many possible words left
+	- win or lose?
+- postgame statistics
+- end game
+frontend
+- swing gui
+- display five word slots
+- display correct/incorrect letters
+- display you win/lose
+
+
