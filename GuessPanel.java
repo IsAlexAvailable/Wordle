@@ -7,6 +7,7 @@ import java.awt.Insets;
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 
 public class GuessPanel extends JPanel {
     private GridBagLayout layout;
@@ -20,6 +21,7 @@ public class GuessPanel extends JPanel {
         initCells();
         setPreferredSize(new Dimension(trueTileSize*5, trueTileSize*6));
         setOpaque(false);   //  guessPanel is transparent, if not, gamepanel background color is hidden
+        revalidate();
     }
 
     public void initLayout() {
@@ -40,20 +42,52 @@ public class GuessPanel extends JPanel {
         }
     }
 
-    private class LetterTile extends JLabel {
-        public LetterTile() {
-            setPreferredSize(new Dimension(trueTileSize, trueTileSize));
-            setText("");
-            setFont(new Font("Courier", Font.BOLD, 28));
-            setForeground(Color.WHITE);
-            setHorizontalAlignment(JLabel.CENTER);
-            setVerticalAlignment(JLabel.CENTER);
-            setBorder(BorderFactory.createLineBorder(new Color(75,75,75), 3));
-        }
 
-        public void setText(String letter) {
-            setText(letter);
+    public void updateGuessTilesText(char[] letters, int guessNumber) {
+        for (int i = 0; i < letters.length; i++) {
+            LetterTile tile = letterTiles[guessNumber][i];
+            if (letters[i] == 0) {
+                tile.setLetterText("");
+            } else {
+                tile.setLetterText("" + letters[i]);
+            }
         }
     }
 
+    public void updateGuessTilesColor(TileState[] letterStates, int guessNumber) {
+        for (int i = 0; i < letterStates.length; i++) {
+            LetterTile tile = letterTiles[guessNumber][i];
+            tile.setLetterColor(letterStates[i]);
+        }
+    }
+    
+    private class LetterTile extends JLabel {
+        public LetterTile() {
+            setPreferredSize(new Dimension(trueTileSize, trueTileSize));
+            setHorizontalAlignment(SwingConstants.CENTER);
+            setVerticalAlignment(SwingConstants.CENTER);
+            setText("");
+            setFont(new Font("Courier", Font.BOLD, 28));
+            setForeground(Color.WHITE);
+            setBorder(BorderFactory.createLineBorder(new Color(75,75,75), 3));
+        }
+
+        public void setLetterText(String letter) {
+            setText(letter.toUpperCase());
+        }
+
+        public void setLetterColor(TileState state) {
+            if (state == TileState.GREY) {
+                setOpaque(false);
+            }
+            else if (state == TileState.GREEN) {
+                setOpaque(true);
+                setBackground(new Color(83,140,79));
+            }
+            else {
+                setOpaque(true);
+                setBackground(new Color(180,158,58));
+            }
+        }
+    }
 }

@@ -41,6 +41,7 @@ public class Wordle extends JFrame {
             } else {
                 menu.update();
             }
+            // revalidate();
             repaint();
         }
     }

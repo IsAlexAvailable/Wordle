@@ -14,6 +14,7 @@ backend
 		- word contains letter
 		- letter in correct place
 		- how many possible words left
+		- prioritizing highlighted 'correct' letters
 	- win or lose?
 - postgame statistics
 - end game

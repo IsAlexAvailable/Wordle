@@ -8,4 +8,5 @@ public class Constants {
     public static final int TILE_SIZE = 64;
     public static final int SCALE = 1;
     public static final int SCALED_TILE_SIZE = TILE_SIZE*SCALE;
+    public static final int maxGuesses = 6;
 }
