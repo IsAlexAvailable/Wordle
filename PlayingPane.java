@@ -8,6 +8,8 @@ public class PlayingPane extends JLayeredPane {
     private PopupPanel winPopup;
     private PopupPanel losePopup;
     private JFrame frame;
+    private int frameWidth;
+    private int frameHeight;
 
     public PlayingPane(JFrame frame) {
         this.frame = frame;
@@ -19,22 +21,18 @@ public class PlayingPane extends JLayeredPane {
         game = new GamePanel(this);
         game.setBounds(new Rectangle(Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT));
         add(game, Constants.GAME_LAYER);
+        updateFrameSize();
     }
 
     public void initPopupPanels() {
         winPopup = new PopupPanel(Constants.WIN_POPUP_LAYER, this);
-        resizeComponent(winPopup, (frameWidth-winPopup.getWidth())/2, (frameHeight-winPopup.getHeight())/2, winPopup.getWidth(), winPopup.getHeight());
         losePopup = new PopupPanel(Constants.LOSE_POPUP_LAYER, this);
-        resizeComponent(losePopup, (frameWidth-losePopup.getWidth())/2, (frameHeight-losePopup.getHeight())/2, losePopup.getWidth(), losePopup.getHeight());
         add(winPopup, Constants.WIN_POPUP_LAYER);
         add(losePopup, Constants.LOSE_POPUP_LAYER);
         winPopup.setVisible(false);
         losePopup.setVisible(false);
     }
-
-    private int frameWidth;
-    private int frameHeight;
-
+    
     public void update() {
         updateFrameSize();
         resizeComponent(game, 0, 0, frameWidth, frameHeight);
@@ -43,10 +41,8 @@ public class PlayingPane extends JLayeredPane {
             game.update();
         } else if (winPopup.isEnabled()) {
             resizeComponent(winPopup, (frameWidth-winPopup.getWidth())/2, (frameHeight-winPopup.getHeight())/2, winPopup.getWidth(), winPopup.getHeight());
-            winPopup.requestFocusInWindow();
         } else if (losePopup.isEnabled()) {
             resizeComponent(losePopup, (frameWidth-losePopup.getWidth())/2, (frameHeight-losePopup.getHeight())/2, losePopup.getWidth(), losePopup.getHeight());
-            losePopup.requestFocusInWindow();
         }
     }
 
@@ -74,10 +70,14 @@ public class PlayingPane extends JLayeredPane {
             moveToFront(winPopup);
             winPopup.setEnabled(true);
             winPopup.setVisible(true);
+            losePopup.setEnabled(false);
+            losePopup.setVisible(false);
         } else {
             moveToFront(losePopup);
             losePopup.setEnabled(true);
             losePopup.setVisible(true);
+            winPopup.setEnabled(false);
+            winPopup.setVisible(false);
         }
     }
 
