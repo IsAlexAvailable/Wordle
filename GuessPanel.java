@@ -1,4 +1,3 @@
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
@@ -14,12 +13,14 @@ public class GuessPanel extends JPanel {
     private GridBagConstraints gbc;
     private LetterTile[][] letterTiles;
     private int trueTileSize = Constants.SCALED_TILE_SIZE;
+    private int rows = Constants.MAXGUESSES;
+    private int cols = Constants.MAXLETTERS;
 
     public GuessPanel() {
         initLayout();
-        letterTiles = new LetterTile[6][5];
+        letterTiles = new LetterTile[rows][cols];
         initCells();
-        setPreferredSize(new Dimension(trueTileSize*5, trueTileSize*6));
+        setPreferredSize(new Dimension(trueTileSize*cols, trueTileSize*rows));
         setOpaque(false);   //  guessPanel is transparent, if not, gamepanel background color is hidden
         revalidate();
     }
@@ -32,8 +33,8 @@ public class GuessPanel extends JPanel {
     }
 
     public void initCells() {
-        for (int r = 0; r < 6; r++) {
-            for (int c = 0; c < 5; c++) {
+        for (int r = 0; r < rows; r++) {
+            for (int c = 0; c < cols; c++) {
                 letterTiles[r][c] = new LetterTile();
                 gbc.gridx = c;  //  specify cell posX
                 gbc.gridy = r;  //  specify cell posY
@@ -42,14 +43,13 @@ public class GuessPanel extends JPanel {
         }
     }
 
-
     public void updateGuessTilesText(char[] letters, int guessNumber) {
         for (int i = 0; i < letters.length; i++) {
             LetterTile tile = letterTiles[guessNumber][i];
             if (letters[i] == 0) {
-                tile.setLetterText("");
+                tile.setTileText("");
             } else {
-                tile.setLetterText("" + letters[i]);
+                tile.setTileText("" + letters[i]);
             }
         }
     }
@@ -57,7 +57,7 @@ public class GuessPanel extends JPanel {
     public void updateGuessTilesColor(TileState[] letterStates, int guessNumber) {
         for (int i = 0; i < letterStates.length; i++) {
             LetterTile tile = letterTiles[guessNumber][i];
-            tile.setLetterColor(letterStates[i]);
+            tile.setTileColor(letterStates[i]);
         }
     }
     
@@ -67,26 +67,26 @@ public class GuessPanel extends JPanel {
             setHorizontalAlignment(SwingConstants.CENTER);
             setVerticalAlignment(SwingConstants.CENTER);
             setText("");
-            setFont(new Font("Courier", Font.BOLD, 28));
-            setForeground(Color.WHITE);
-            setBorder(BorderFactory.createLineBorder(new Color(75,75,75), 3));
+            setFont(new Font(Constants.FONT, Font.BOLD, 28));
+            setForeground(Constants.WHITE);
+            setBorder(BorderFactory.createLineBorder(Constants.LIGHT_GREY, 3));
         }
 
-        public void setLetterText(String letter) {
+        public void setTileText(String letter) {
             setText(letter.toUpperCase());
         }
 
-        public void setLetterColor(TileState state) {
-            if (state == TileState.GREY) {
-                setOpaque(false);
+        public void setTileColor(TileState state) {
+            if (state == TileState.GREY) {  
+                setOpaque(false);   //  maintains the background panel color
             }
             else if (state == TileState.GREEN) {
-                setOpaque(true);
-                setBackground(new Color(83,140,79));
+                setOpaque(true);    //  sets its own color to green separate from the background
+                setBackground(Constants.GREEN);
             }
             else {
-                setOpaque(true);
-                setBackground(new Color(180,158,58));
+                setOpaque(true);    //  sets its own color to yellow separate from the background
+                setBackground(Constants.YELLOW);
             }
         }
     }

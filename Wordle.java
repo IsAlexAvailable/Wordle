@@ -1,17 +1,15 @@
-import javax.swing.*;
+import javax.swing.JFrame;
 import java.awt.CardLayout;
 import java.awt.Dimension;
 
 public class Wordle extends JFrame {
     private CardLayout cardLayout;
-    private MenuPanel menu;
-    private GamePanel game;
+    private MenuPanel menuPanel;
+    private PlayingPane gamePane;
     private boolean gameRunning;
     private boolean gamePaused;
 
     public Wordle() {
-        menu = new MenuPanel();
-        game = new GamePanel();
         initWindow();
         gameRunning = true;
         gamePaused = true;
@@ -19,17 +17,24 @@ public class Wordle extends JFrame {
     }
 
     public void initWindow() {
-        cardLayout = new CardLayout();
-        getContentPane().setLayout(cardLayout);
-        getContentPane().add(Constants.MENU_NAME, menu);
-        getContentPane().add(Constants.GAME_NAME, game);
-        setLayout(cardLayout);
+        int minWindowWidth = Constants.MINIMUM_WIDTH;
+        int minWindowHeight = Constants.MINIMUM_HEIGHT;
 
         setTitle("Wordle");
-        setPreferredSize(new Dimension(1000, 1000));  //  TODO determine dimensions
-        setMinimumSize(new Dimension(500, 500));
+        setPreferredSize(new Dimension(minWindowWidth*2, minWindowHeight*2));  //  TODO determine dimensions
+        setMinimumSize(new Dimension(minWindowWidth, minWindowHeight));
         setResizable(true);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        menuPanel = new MenuPanel();
+        gamePane = new PlayingPane(this);
+        
+        cardLayout = new CardLayout();
+        getContentPane().setLayout(cardLayout);
+        getContentPane().add(Constants.MENU_NAME, menuPanel);
+        getContentPane().add(Constants.GAME_NAME, gamePane);
+        setLayout(cardLayout);
+
         pack();
         setVisible(true);
     }
@@ -37,24 +42,23 @@ public class Wordle extends JFrame {
     public void runGameLoop() {
         while (gameRunning) {
             if (!gamePaused) {
-                game.update();
+                gamePane.update();
             } else {
-                menu.update();
+                menuPanel.update();
             }
-            // revalidate();
             repaint();
         }
     }
 
     public void pauseGame() {
         cardLayout.show(getContentPane(), Constants.MENU_NAME);
-        menu.requestFocusInWindow();
+        menuPanel.requestFocusInWindow();
         gamePaused = true;
     }
 
     public void resumeGame() {
         cardLayout.show(getContentPane(), Constants.GAME_NAME);
-        game.requestFocusInWindow();
+        gamePane.requestFocusInWindow();
         gamePaused = false;
     }
 
