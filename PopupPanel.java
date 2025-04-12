@@ -6,6 +6,7 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.BorderFactory;
@@ -18,25 +19,28 @@ import javax.swing.JPanel;
 public class PopupPanel extends JPanel {
     private PlayingPane playingPane;
     private int popupType;
+    private String wordleWord;
     private int width;
     private int height;
     private JPanel headerPanel;
     private JLabel headerText;
+    private JLabel correctWordText;
     private JPanel buttonPanel;
-    private CustomButton playAgainButton;
-    private CustomButton exitButton;
+    private EndGameButton playAgainButton;
+    private EndGameButton exitButton;
 
-    public PopupPanel(int popupType, PlayingPane playingPane) {
+    public PopupPanel(int popupType, String wordleWord, PlayingPane playingPane) {
         this.playingPane = playingPane;
-        if (popupType != Constants.WIN_POPUP_LAYER || popupType != Constants.LOSE_POPUP_LAYER) {
-            //  TODO: exception handling
+        if (popupType != Constants.WIN_POPUP_LAYER && popupType != Constants.LOSE_POPUP_LAYER) {
+            throw new IllegalArgumentException("Popup type int must be in range " + Constants.WIN_POPUP_LAYER + " - " + Constants.LOSE_POPUP_LAYER);
         }
         this.popupType = popupType;
+        this.wordleWord = wordleWord;
         width = Constants.POPUP_WIDTH;
         height = Constants.POPUP_HEIGHT;
         setLayout(new BorderLayout());
-        setBackground(Constants.DARK_GREY);
-        setBorder(BorderFactory.createLineBorder(Constants.LIGHT_GREY, 3));
+        setBackground(Constants.BLACK);
+        setBorder(BorderFactory.createLineBorder(Constants.DARK_GREY, 3));
 
         initHeader();
         initButtonPanel();
@@ -48,18 +52,25 @@ public class PopupPanel extends JPanel {
         }
         else {
             headerText = new JLabel(Constants.LOSE_TEXT);
+            correctWordText = new JLabel("The word was: " + wordleWord);
+            correctWordText.setAlignmentX(Component.CENTER_ALIGNMENT);
+            correctWordText.setFont(new Font(Constants.FONT, Font.BOLD, 16));
+            correctWordText.setForeground(Constants.WHITE);
         }
         headerText.setAlignmentX(Component.CENTER_ALIGNMENT);
         headerText.setFont(new Font(Constants.FONT, Font.BOLD, 20));
         headerText.setForeground(Constants.WHITE);
-
+        
         headerPanel = new JPanel();
         headerPanel.setLayout(new BoxLayout(headerPanel, BoxLayout.Y_AXIS));
         headerPanel.setOpaque(false);
-
         headerPanel.add(Box.createVerticalStrut(25));
         headerPanel.add(headerText);
-        headerPanel.add(Box.createVerticalStrut(25));
+        if (popupType == Constants.LOSE_POPUP_LAYER) {
+            headerPanel.add(Box.createVerticalStrut(5));
+            headerPanel.add(correctWordText);
+        }
+        headerPanel.add(Box.createVerticalStrut(15));
         
         add(headerPanel, BorderLayout.NORTH);
     }
@@ -69,7 +80,7 @@ public class PopupPanel extends JPanel {
         buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
         buttonPanel.setOpaque(false);
 
-        playAgainButton = new CustomButton(Constants.PLAY_AGAIN);
+        playAgainButton = new EndGameButton(Constants.PLAY_AGAIN);
         playAgainButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         playAgainButton.addActionListener(new ActionListener() {
             @Override
@@ -77,7 +88,8 @@ public class PopupPanel extends JPanel {
                 playingPane.newGame();
             }
          });
-        exitButton = new CustomButton(Constants.EXIT);
+
+        exitButton = new EndGameButton(Constants.EXIT);
         exitButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         exitButton.addActionListener(new ActionListener() {
             @Override
@@ -85,6 +97,7 @@ public class PopupPanel extends JPanel {
                 System.exit(0);
             }
         });
+
         buttonPanel.add(Box.createVerticalStrut(50));
         buttonPanel.add(playAgainButton);
         buttonPanel.add(Box.createVerticalStrut(50));
@@ -92,8 +105,21 @@ public class PopupPanel extends JPanel {
         add(buttonPanel, BorderLayout.CENTER);
     }
 
-    private class CustomButton extends JButton {
-        public CustomButton(String title) {
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    public void activate(boolean b) {
+        setEnabled(b);
+        setVisible(b);
+    }
+
+    private class EndGameButton extends JButton {
+        public EndGameButton(String title) {
             super(title);
             setFont(new Font(Constants.FONT, Font.BOLD, 14));
             setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -102,12 +128,15 @@ public class PopupPanel extends JPanel {
             setOpaque(false);
             setContentAreaFilled(false);
             setFocusPainted(false);
+            setBorderPainted(false);
         }
 
         @Override
         public void paintComponent(Graphics g) {
+            
             //  draw text bubble
-            Graphics2D g2d = (Graphics2D) g.create();
+            Graphics2D g2d = (Graphics2D) g;
+            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             g2d.setColor(Constants.GREEN);
             g2d.fillRoundRect(0, 0, getWidth(), getHeight(), 50, 50);
             
@@ -123,13 +152,5 @@ public class PopupPanel extends JPanel {
 
             g2d.dispose();
         }
-    }
-
-    public int getWidth() {
-        return width;
-    }
-
-    public int getHeight() {
-        return height;
     }
 }

@@ -1,5 +1,3 @@
-import java.awt.Rectangle;
-import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLayeredPane;
 
@@ -10,6 +8,8 @@ public class PlayingPane extends JLayeredPane {
     private JFrame frame;
     private int frameWidth;
     private int frameHeight;
+    private boolean gameOver = false;
+    private String wordleWord;
 
     public PlayingPane(JFrame frame) {
         this.frame = frame;
@@ -19,14 +19,15 @@ public class PlayingPane extends JLayeredPane {
 
     public void initGamePanel() {
         game = new GamePanel(this);
-        game.setBounds(new Rectangle(Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT));
-        add(game, Constants.GAME_LAYER);
+        wordleWord = game.getWordleWord();
         updateFrameSize();
+        game.setBounds(0, 0, frameWidth, frameHeight);
+        add(game, Constants.GAME_LAYER);
     }
 
     public void initPopupPanels() {
-        winPopup = new PopupPanel(Constants.WIN_POPUP_LAYER, this);
-        losePopup = new PopupPanel(Constants.LOSE_POPUP_LAYER, this);
+        winPopup = new PopupPanel(Constants.WIN_POPUP_LAYER, null, this);
+        losePopup = new PopupPanel(Constants.LOSE_POPUP_LAYER, wordleWord, this);
         add(winPopup, Constants.WIN_POPUP_LAYER);
         add(losePopup, Constants.LOSE_POPUP_LAYER);
         winPopup.setVisible(false);
@@ -34,15 +35,9 @@ public class PlayingPane extends JLayeredPane {
     }
     
     public void update() {
-        updateFrameSize();
-        resizeComponent(game, 0, 0, frameWidth, frameHeight);
-        if (game.isEnabled()) {
-            game.requestFocusInWindow();
+        if (game.isEnabled() && !gameOver) {
             game.update();
-        } else if (winPopup.isEnabled()) {
-            resizeComponent(winPopup, (frameWidth-winPopup.getWidth())/2, (frameHeight-winPopup.getHeight())/2, winPopup.getWidth(), winPopup.getHeight());
-        } else if (losePopup.isEnabled()) {
-            resizeComponent(losePopup, (frameWidth-losePopup.getWidth())/2, (frameHeight-losePopup.getHeight())/2, losePopup.getWidth(), losePopup.getHeight());
+            game.requestFocusInWindow();
         }
     }
 
@@ -51,41 +46,45 @@ public class PlayingPane extends JLayeredPane {
         frameHeight = frame.getHeight();
     }
 
-    public void resizeComponent(JComponent component, int x, int y, int width, int height) {
-        component.setBounds(new Rectangle(x, y, width, height));
+    public void resize() {  //  FIXME: shitty results
+        updateFrameSize();
+        game.setBounds(0, 0, frameWidth, frameHeight);
+        winPopup.setBounds((frameWidth-winPopup.getWidth())/2, (frameHeight-winPopup.getHeight())/2, winPopup.getWidth(), winPopup.getHeight());
+        losePopup.setBounds((frameWidth-losePopup.getWidth())/2, (frameHeight-losePopup.getHeight())/2, losePopup.getWidth(), losePopup.getHeight());
+        revalidate();
+        repaint();
     }
 
     public void showGame() {
-        moveToFront(game);
+        winPopup.activate(false);
+        losePopup.activate(false);        
         game.setEnabled(true);
-        winPopup.setEnabled(false);
-        losePopup.setEnabled(false);
-        winPopup.setVisible(false);
-        losePopup.setVisible(false);
+        moveToFront(game);
     }
 
     public void showEndPopup(boolean hasWon) {
         game.setEnabled(false);
         if (hasWon) {
+            losePopup.activate(false);
+            winPopup.activate(true);
             moveToFront(winPopup);
-            winPopup.setEnabled(true);
-            winPopup.setVisible(true);
-            losePopup.setEnabled(false);
-            losePopup.setVisible(false);
         } else {
+            winPopup.activate(false);
+            losePopup.activate(true);
             moveToFront(losePopup);
-            losePopup.setEnabled(true);
-            losePopup.setVisible(true);
-            winPopup.setEnabled(false);
-            winPopup.setVisible(false);
         }
+    }
+
+    public void endGame() {
+        gameOver = true;
     }
 
     public void newGame() { //  remove current game from playing pane and add new one
         remove(game);
         game = new GamePanel(this);
-        game.setBounds(new Rectangle(Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT));
         add(game, Constants.GAME_LAYER);
+        gameOver = false;
+        resize();
         showGame();
     }
 }

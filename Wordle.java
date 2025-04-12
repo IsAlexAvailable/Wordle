@@ -1,38 +1,47 @@
 import javax.swing.JFrame;
 import java.awt.CardLayout;
 import java.awt.Dimension;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 
 public class Wordle extends JFrame {
     private CardLayout cardLayout;
     private MenuPanel menuPanel;
-    private PlayingPane gamePane;
+    private PlayingPane playingPane;
     private boolean gameRunning;
     private boolean gamePaused;
 
     public Wordle() {
         initWindow();
         gameRunning = true;
-        gamePaused = true;
+        gamePaused = false;
+        addComponentListener(new ComponentAdapter() {
+            public void componentResized(ComponentEvent e) {
+                playingPane.resize();
+            }
+        });
         resumeGame();
     }
 
     public void initWindow() {
         int minWindowWidth = Constants.MINIMUM_WIDTH;
         int minWindowHeight = Constants.MINIMUM_HEIGHT;
+        int windowWidth = Constants.SCREEN_WIDTH;
+        int windowHeight = Constants.SCREEN_HEIGHT;
 
         setTitle("Wordle");
-        setPreferredSize(new Dimension(minWindowWidth*2, minWindowHeight*2));  //  TODO determine dimensions
+        setPreferredSize(new Dimension(windowWidth, windowHeight));  //  TODO determine dimensions
         setMinimumSize(new Dimension(minWindowWidth, minWindowHeight));
         setResizable(true);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         menuPanel = new MenuPanel();
-        gamePane = new PlayingPane(this);
+        playingPane = new PlayingPane(this);
         
         cardLayout = new CardLayout();
         getContentPane().setLayout(cardLayout);
         getContentPane().add(Constants.MENU_NAME, menuPanel);
-        getContentPane().add(Constants.GAME_NAME, gamePane);
+        getContentPane().add(Constants.GAME_NAME, playingPane);
         setLayout(cardLayout);
 
         pack();
@@ -42,7 +51,7 @@ public class Wordle extends JFrame {
     public void runGameLoop() {
         while (gameRunning) {
             if (!gamePaused) {
-                gamePane.update();
+                playingPane.update();
             } else {
                 menuPanel.update();
             }
@@ -58,7 +67,7 @@ public class Wordle extends JFrame {
 
     public void resumeGame() {
         cardLayout.show(getContentPane(), Constants.GAME_NAME);
-        gamePane.requestFocusInWindow();
+        playingPane.requestFocusInWindow();
         gamePaused = false;
     }
 

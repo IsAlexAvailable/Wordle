@@ -3,10 +3,8 @@ import java.util.HashSet;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Random;
-
 import Exceptions.DuplicateGuessException;
 import Exceptions.InvalidWordException;
-
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -100,32 +98,32 @@ public class WordManager {
         }
     }
 
-    public void updateTileStates(char[] wordGuess, TileState[] letterStates) {
+    public void updateTileStates(char[] wordGuess, TileColor[] letterStates) {
         HashMap<Character, Integer> guessWordLetterCount = new HashMap<>(5);
 
         //  initial pass to test letter absence and direct matches
         for (int i = 0; i < wordGuess.length; i++) {
             char currLetter = wordGuess[i];
             if (!isInWord(currLetter)) {
-                letterStates[i] = TileState.GREY;
+                letterStates[i] = TileColor.DARK_GREY;
             }
             else if (isDirectMatch(currLetter, i)) {
-                letterStates[i] = TileState.GREEN;
+                letterStates[i] = TileColor.GREEN;
                 updateLetterCounts(currLetter, guessWordLetterCount);
             }
         }
 
         for (int i = 0; i < wordGuess.length; i++) {
             char currLetter = wordGuess[i];
-            if (letterStates[i] == TileState.GREEN || letterStates[i] == TileState.GREY) {  //  already set
+            if (letterStates[i] == TileColor.GREEN || letterStates[i] == TileColor.DARK_GREY) {  //  already set
                 continue;
             }
             updateLetterCounts(currLetter, guessWordLetterCount);
-            if (letterStates[i] != TileState.GREEN && shouldSetStateYellow(currLetter, i, guessWordLetterCount)) {
-                letterStates[i] = TileState.YELLOW;
+            if (letterStates[i] != TileColor.GREEN && shouldSetStateYellow(currLetter, i, guessWordLetterCount)) {
+                letterStates[i] = TileColor.YELLOW;
             }
             else {  //  although letter occurs, no more spots that aren't already filled
-                letterStates[i] = TileState.GREY;
+                letterStates[i] = TileColor.DARK_GREY;
             }
         }
     }
