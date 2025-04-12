@@ -1,3 +1,4 @@
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import java.awt.CardLayout;
 import java.awt.Dimension;
@@ -21,6 +22,8 @@ public class Wordle extends JFrame {
             }
         });
         resumeGame();
+        ImageIcon windowIcon = new ImageIcon(getClass().getClassLoader().getResource("wordleIcon.png"));
+        setIconImage(windowIcon.getImage());
     }
 
     public void initWindow() {

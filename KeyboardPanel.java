@@ -1,14 +1,13 @@
 import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import java.awt.Cursor;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
 import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -18,101 +17,77 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class KeyboardPanel extends JPanel {
     private JButton[] letters;
     private HashMap<Character, KeyTile> keyTileMap;
-    private GridBagLayout layout;
-    private GridBagConstraints gbc;
+    private BoxLayout layout;
+    private JPanel row1;
+    private JPanel row2;
+    private JPanel row3;
     private int keyWidth;
     private int keyHeight;
-    private int rows = 3;
-    private int cols = 10;
     private ConcurrentLinkedQueue<Character> keyQueue;
 
     public KeyboardPanel(ConcurrentLinkedQueue<Character> keyQueue) {
         this.keyQueue = keyQueue;
         setPreferredSize(new Dimension(100, 450));
         setOpaque(false);   //  keyBoard panel is transparent, if not, gamepanel background color is hidden
-        setBorder(BorderFactory.createEmptyBorder(0,0,240,0));
+        setBorder(BorderFactory.createEmptyBorder(0,0,240,0));  //  push the keyboard up towards guess panel
         initPanelLayout();
         initLetters();
-        initLetterCells();
+        initKeyRowCells();
     }
 
     public void initLetters() {
         letters = new LetterTile[28];
         keyTileMap = new HashMap<>();
-        char a = 'a';
+        String keys = "qwertyuiopasdfghjkl\nzxcvbnm\b";
+        char[] keyArr = keys.toCharArray();
         char currChar;
         keyWidth = Constants.SCALED_TILE_SIZE*2/3;
         keyHeight = Constants.SCALED_TILE_SIZE*7/8;
         KeyTile currKeyTile;
-        int offset = 0;
-        for (int i = 0; i < 28; i++) {
-            if (i == 19) {
-                currChar = '\n';
+
+        for (int i = 0; i < keyArr.length; i++) {
+            currChar = keyArr[i];
+            if (currChar == '\n' || currChar == '\b') {
                 currKeyTile = new KeyTile(currChar, keyWidth*3/2, keyHeight);
-                keyTileMap.put(currChar, currKeyTile);
-                offset--;
-            } else if (i == 27) {
-                currChar = '\b';
-                currKeyTile = new KeyTile(currChar, keyWidth*3/2, keyHeight);
-                keyTileMap.put(currChar, currKeyTile);   
             } else {
-                currChar = (char) (a + offset);
                 currKeyTile = new KeyTile(currChar, keyWidth, keyHeight);
-                keyTileMap.put(currChar, currKeyTile);
             }
+            keyTileMap.put(currChar, currKeyTile);
             letters[i] = currKeyTile;
-            offset++;
         }
     }
 
     public void initPanelLayout() {
-        layout = new GridBagLayout();
+        layout = new BoxLayout(this, BoxLayout.Y_AXIS);
         setLayout(layout);
-        gbc = new GridBagConstraints();
-        gbc.insets = new Insets(3, 3, 3, 3);
-        gbc.fill = GridBagConstraints.NONE;
+        row1 = getNewKeyRow();
+        row2 = getNewKeyRow();
+        row3 = getNewKeyRow();
     }
 
-    public void initLetterCells() {
-        // TODO: ?????????????????
-        // gbc.gridwidth = 1;
-        // for (int j = 0; j < letters.length; j++) {
-        //     if (j == 9 || j == 18) {
-        //         gbc.gridwidth = GridBagConstraints.REMAINDER;
-        //     }
-        //     else {
-        //         gbc.gridwidth = 1;
-        //     }
-        //     if (j == 0 || j == 10) {
-        //         gbc.anchor = GridBagConstraints.EAST;
-        //     } else if (j == 8 || j == 9 || j == 18) {
-        //         gbc.anchor = GridBagConstraints.WEST;
-        //     }
-        //     add(letters[j], gbc);
-        // }
-        
-        int i = 0;
-        for (int r = 0; r < rows; r++) {
-            for (int c = 0; c < cols; c++) {
-                if (r != 0 && c == cols-1) {
-                    break;
-                }
-                if (c == 0) {
-                    gbc.anchor = GridBagConstraints.EAST;
-                }
-                else if (c == cols-2) {
-                    gbc.anchor = GridBagConstraints.WEST;
-                }
-                else {
-                    gbc.anchor = GridBagConstraints.CENTER;
-                }
-                gbc.gridx = c;
-                gbc.gridy = r;
-                add(letters[i], gbc);
-                i++;
-            }
+    public JPanel getNewKeyRow() {
+        JPanel row = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
+        row.setMaximumSize(new Dimension(500, 63));
+        row.setPreferredSize(new Dimension(500, 63));
+        row.setOpaque(false);
+        return row;
+    }
+
+    public void initKeyRowCells() {
+        int i;
+        int j;
+        for (i = 0 ; i < 10; i++) {
+            row1.add(letters[i]);
         }
-        
+        for (j = 0; j < 9; j++) {
+            row2.add(letters[j+i]);
+        }
+        for (int k = 0; k < 9; k++) {
+            row3.add(letters[k+i+j]);
+        }
+        add(row1);
+        add(row2);
+        add(row3);
     }
 
     public void updateGuessTilesColor(LetterTile[] letterTiles) {
@@ -148,29 +123,32 @@ public class KeyboardPanel extends JPanel {
             tileWidth = width;
             tileHeight = height;
             key = c;
-            setMinimumSize(new Dimension(width, height));
+            setMinimumSize(new Dimension(tileWidth, tileHeight));
             setTileColor(TileColor.LIGHT_GREY);
-            setFont(new Font(Constants.FONT, Font.BOLD, 18));
-            if (c == '\n') {
-                setFont(new Font(Constants.FONT, Font.BOLD, 14));
-                setText("ENTER");
-            } else if (c == '\b') {
-                setFont(new Font(Constants.FONT, Font.BOLD, 14));
-                setText("BACK");
-            }
+            initText();
+            addActionListener(new ActionListener() {    //  clicking this adds key to tasks
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    keyQueue.add(key);
+                }
+            });
 
             setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             setContentAreaFilled(false);
             setFocusPainted(false);
-            addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    keyQueue.add(key);
-
-                }
-            });
         }
         
+        public void initText() {
+            setFont(new Font(Constants.FONT, Font.BOLD, 18));
+            if (key == '\n') {
+                setFont(new Font(Constants.FONT, Font.BOLD, 14));
+                setText("ENTER");
+            } else if (key == '\b') {
+                setFont(new Font(Constants.FONT, Font.BOLD, 14));
+                setText("BACK");
+            }
+        }
+
         public void setTileColor(TileColor tileColor) {
             if (tileColor == TileColor.BLACK) {
                 setBackground(Constants.BLACK);
@@ -192,7 +170,7 @@ public class KeyboardPanel extends JPanel {
         @Override
         public void paintComponent(Graphics g) {
             Graphics2D g2d = (Graphics2D) g;
-            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);   //  prevent aliasing on tile's curved corners
             g2d.setColor(getBackground());
             g2d.fillRoundRect(0, 0, tileWidth, tileHeight,8,8);
             super.paintComponent(g);

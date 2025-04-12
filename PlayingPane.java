@@ -79,10 +79,14 @@ public class PlayingPane extends JLayeredPane {
         gameOver = true;
     }
 
-    public void newGame() { //  remove current game from playing pane and add new one
+    public void newGame() { //  remove current game from playing pane and add new one, replace losepopup text with new wordleword
         remove(game);
+        remove(losePopup);
         game = new GamePanel(this);
         add(game, Constants.GAME_LAYER);
+        wordleWord = game.getWordleWord();
+        losePopup = new PopupPanel(Constants.LOSE_POPUP_LAYER, wordleWord, this);
+        add(losePopup, Constants.LOSE_POPUP_LAYER);
         gameOver = false;
         resize();
         showGame();
